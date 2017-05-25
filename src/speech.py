@@ -314,6 +314,10 @@ class CloudSpeechRequest(GenericSpeechRequest):
             streaming_config=streaming_config)
 
     def _create_audio_request(self, data):
+        # The Cloud Speech API is currently unable to handle nulls in the audio
+        # data. The recommended workaround is to replace them with 1s.
+        # TODO(rodrigoq): remove this workaround once b/37667976 is fixed.
+        data = data.replace(b'\0', b'\1')
         return cloud_speech.StreamingRecognizeRequest(audio_content=data)
 
     def _create_response_stream(self, service, request_stream, deadline):
